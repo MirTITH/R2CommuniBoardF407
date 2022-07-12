@@ -32,8 +32,6 @@ defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
 extern int fix_counter;
 
-bool pnt_UC_Debug_Data = true;
-
 void TestTask(void const *argument);
 
 UC_Data_t RxData = {0};
@@ -42,31 +40,38 @@ int can_rx_count = 0;
 
 void StartDefaultTask(void const *argument)
 {
+	osDelay(500);
+
 	CLI_Init(&huart6);
 	UD_SetPrintfDevice(UD_Find(&huart6));
 
 	osThreadDef(testTask, TestTask, osPriorityNormal, 0, 256);
 	osThreadCreate(osThread(testTask), NULL);
 
-	//大疆电机初始化
+	DJI_PID_Init();
+
+	UpperTaskInit();
+
+	DJI_motorType_Init();
 	CANFilterInit(&hcan1);
-	hDJI[0].motorType = M3508; // 升降
-	DJI_Init();
+
 	UC_Receive_Start(1, &huart3, &RxData);
-	// ChassisTaskStart(&RxData);
 	UpperTaskStart(&RxData);
 
+	// ChassisTaskStart(&RxData);
 	// ADS1256_Init();
 
 	while (1)
 	{
-		osDelay(10000);
+		osDelay(1000);
 	}
 }
 
+bool pnt_UC_Debug_Data = false;
+bool pnt_RxData = false;
+bool pnt_can_rx_count = false;
 void TestTask(void const *argument)
 {
-	pnt_UC_Debug_Data = false;
 	for (;;)
 	{
 		if (pnt_UC_Debug_Data)
@@ -74,12 +79,17 @@ void TestTask(void const *argument)
 			UC_print_debug_data();
 		}
 
-		UD_printf("lx:%5d ly:%5d rx:%5d ry:%5d ", RxData.Leftx, RxData.Lefty, RxData.Rightx, RxData.Righty);
-		UD_printf("but:%x\n", RxData.buttons);
+		if (pnt_RxData)
+		{
+			UD_printf("lx:%5d ly:%5d rx:%5d ry:%5d ", RxData.Leftx, RxData.Lefty, RxData.Rightx, RxData.Righty);
+			UD_printf("but:%x\n", RxData.buttons);
+		}
 
-		UD_printf("can_rx_count:%d\n", can_rx_count);
+		if(pnt_can_rx_count)
+		{
+			UD_printf("can_rx_count:%d\n", can_rx_count);
+		}
 
-		// UD_printf("fix counter: %d\n", fix_counter);
 		osDelay(500);
 	}
 }

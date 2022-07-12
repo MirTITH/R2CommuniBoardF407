@@ -12,3 +12,4 @@
 #include "uart_com.h"
 
 void UpperTaskStart(UC_Data_t *RxData);
+void UpperTaskInit();
