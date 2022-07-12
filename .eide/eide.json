@@ -59,7 +59,8 @@
     "./Core",
     "./Drivers",
     "./Middlewares",
-    "./STM32CubeIDE"
+    "./STM32CubeIDE",
+    "./UserCode"
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
@@ -90,7 +91,7 @@
     }
   },
   "miscInfo": {
-    "uid": "7519caaafa5fa122091f2996f4d3e764"
+    "uid": "23395cae3b788ea56d5c9badd155366f"
   },
   "targets": {},
   "version": "3.1"
