@@ -30,22 +30,21 @@ typedef enum
 void UpperTask(void const *argument)
 {
 	const UC_Data_t *RxData = argument;
-	double joystick_lx, joystick_ly, joystick_rx, joystick_ry;
+	double lift_speed;
 	uint32_t PreviousWakeTime = osKernelSysTick();
 
 	for (;;)
 	{
-		joystick_lx = RxData->Leftx;
-		joystick_ly = RxData->Lefty;
-		joystick_rx = RxData->Rightx;
-		joystick_ry = RxData->Righty;
+		lift_speed = RxData->Righty;
 
-		if (fabs(joystick_lx) < 200) joystick_lx = 0.0f;
-		if (fabs(joystick_ly) < 200) joystick_ly = 0.0f;
-		if (fabs(joystick_rx) < 200) joystick_rx = 0.0f;
-		if (fabs(joystick_ry) < 200) joystick_ry = 0.0f;
+		if (lift_speed > 400)
+			lift_speed -= 400;
+		else if (lift_speed < -400)
+			lift_speed += 400;
+		else
+			lift_speed = 0;
 
-		speedServo(joystick_ry, &hDJI[0]);
+		speedServo(2*lift_speed, &hDJI[0]);
 
 		CanTransmit_DJI_1234(&hcan1,
 						 hDJI[0].speedPID.output,
@@ -53,7 +52,7 @@ void UpperTask(void const *argument)
 		
 						 hDJI[2].speedPID.output,
 						 hDJI[3].speedPID.output);
-		osDelayUntil(&PreviousWakeTime, 10);
+		osDelayUntil(&PreviousWakeTime, 2);
 	}	
 }
 
