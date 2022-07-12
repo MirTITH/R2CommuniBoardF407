@@ -30,8 +30,6 @@ defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 #include "chassis_control.h"
 #include "upper_control.h"
 
-extern int fix_counter;
-
 void TestTask(void const *argument);
 
 UC_Data_t RxData = {0};

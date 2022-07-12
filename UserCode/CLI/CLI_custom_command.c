@@ -24,7 +24,7 @@ void vRegisterCustomCLICommands(void)
 	CLI_New_Command(joystkl, joystick left_x left_y, F_Set_joystickL, 2);
 	CLI_New_Command(joystkr, joystick right_x right_y, F_Set_joystickR, 2);
 	CLI_New_Command(kamimadoka, kami.im, F_kamimadoka, 0);
-	// CLI_New_Command(pnt, print, F_pnt, 0);
+	CLI_New_Command(prnt, print, F_pnt, -1);
 	CLI_New_Command(reboot, reboot, F_reboot, 0);
 }
 
@@ -87,32 +87,39 @@ BaseType_t F_kamimadoka(char *pcWriteBuffer, size_t xWriteBufferLen, const char 
 
 //-------------------------------自定义命令写在下面（记得在上面的vRegisterCustomCLICommands()中注册）--------------------------
 
-// extern bool pnt_UC_Debug_Data;
-// extern bool pnt_RxData;
-// extern bool pnt_can_rx_count;
-// BaseType_t F_pnt(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
-// {
-// 	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength);
+extern bool pnt_UC_Debug_Data;
+extern bool pnt_RxData;
+extern bool pnt_can_rx_count;
+extern int fix_counter;
+BaseType_t F_pnt(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
+{
+	BaseType_t xParameterStringLength;
+	const char *pcParameter;
+	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength);
 
-// 	if (strcmp(pcParameter, "uc_debug_data"))
-// 	{
-// 		pnt_UC_Debug_Data = !pnt_UC_Debug_Data;
-// 	}
-// 	else if (strcmp(pcParameter, "fix_counter"))
-// 	{
-// 		UD_printf("fix_counter: %d\n", fix_counter);
-// 	}
-// 	else if (strcmp(pcParameter, "rx_data"))
-// 	{
-// 		pnt_RxData = !pnt_RxData;
-// 	}
-// 	else if (strcmp(pcParameter, "can_rx_count"))
-// 	{
-// 		pnt_can_rx_count = !pnt_can_rx_count;
-// 	}
+	if (strcmp(pcParameter, "uc_debug_data") == 0)
+	{
+		pnt_UC_Debug_Data = !pnt_UC_Debug_Data;
+	}
+	else if (strcmp(pcParameter, "fix_counter") == 0)
+	{
+		UD_printf("fix_counter: %d\n", fix_counter);
+	}
+	else if (strcmp(pcParameter, "rx_data") == 0)
+	{
+		pnt_RxData = !pnt_RxData;
+	}
+	else if (strcmp(pcParameter, "can_rx_count") == 0)
+	{
+		pnt_can_rx_count = !pnt_can_rx_count;
+	}
+	else
+	{
+		UD_printf("pnt uc_debug_data | fix_counter | rx_data | can_rx_count\n");
+	}
 	
-// 	return pdFAIL;
-// }
+	return pdFAIL;
+}
 
 BaseType_t F_reboot(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
 {
