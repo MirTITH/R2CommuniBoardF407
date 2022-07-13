@@ -16,11 +16,17 @@
 #include "cmsis_os.h"
 #include "math.h"
 #include "uart_device.h"
+#include "tim.h"
+#include <stdbool.h>
+
+// int Claw_Steer_pw[2] = {0};
+bool claw_open = false;
 
 void UpperTask(void const *argument)
 {
 	const UC_Data_t *RxData = argument;
 	double lift_speed;
+
 	uint32_t PreviousWakeTime = osKernelSysTick();
 
 	for (;;)
@@ -51,7 +57,20 @@ void UpperTask(void const *argument)
 			speedServo(0, &hDJI[2]);
 		}
 
+		// 爪子旋转
 		positionServo(0, &hDJI[1]);
+
+		// 爪子舵机
+		if (claw_open)
+		{
+			__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 1715);	// 白，PD12
+			__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, 501); // 绿,PB15
+		}
+		else
+		{
+			__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 1050);	// 白，PD12
+			__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, 1100); // 绿,PB15
+		}
 
 		CanTransmit_DJI_1234(&hcan1,
 							 hDJI[0].speedPID.output,
@@ -73,6 +92,9 @@ void UpperTaskInit()
 	// 爪子夹具
 	hDJI[2].motorType = M3508;
 	hDJI[2].speedPID.outputMax = 2000;
+
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim12,TIM_CHANNEL_2);
 }
 
 void UpperTaskStart(UC_Data_t *RxData)
