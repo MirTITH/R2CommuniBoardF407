@@ -7,7 +7,6 @@
 #include "main.h"
 #include "uart_device.h"
 #include "uart_com.h"
-#include "chassis_driver.h"
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {

@@ -23,11 +23,9 @@ defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 #include "DJI.h"
 #include "wtr_can.h"
 #include "Caculate.h"
-#include "vesc.h"
 #include "uart_com.h"
 #include "string.h"
 #include <stdbool.h>
-#include "chassis_control.h"
 #include "upper_control.h"
 
 void TestTask(void const *argument);
@@ -56,7 +54,6 @@ void StartDefaultTask(void const *argument)
 	UC_Receive_Start(1, &huart3, &RxData);
 	UpperTaskStart(&RxData);
 
-	// ChassisTaskStart(&RxData);
 	// ADS1256_Init();
 
 	while (1)
