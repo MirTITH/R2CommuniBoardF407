@@ -47,28 +47,26 @@ void StartDefaultTask(void const *argument)
 	osThreadDef(testTask, TestTask, osPriorityNormal, 0, 256);
 	osThreadCreate(osThread(testTask), NULL);
 
-	HWT_Init(&hhwt1, &huart3);
+	// HWT_Init(&hhwt1, &huart3);
 
-	// DJI_PID_Init();
+	DJI_PID_Init();
 
-	// UpperTaskInit();
+	UpperTaskInit();
 
-	// DJI_motorType_Init();
-	// CANFilterInit(&hcan1);
+	DJI_motorType_Init();
+	CANFilterInit(&hcan1);
 
 
-	// UC_Receive_Start(1, &huart3, &RxData);
-	// UpperTaskStart(&RxData);
+	UC_Receive_Start(1, &huart3, &RxData);
+	UpperTaskStart(&RxData);
 
 	// ADS1256_Init();
 
 	while (1)
 	{
-		// UD_Read(ud6, &rx_cha, 1000);
-		// UD_printf("%x ",rx_cha);
 		// UD_printf("YAW:%6d Wz_Raw:%6d Wz_C:%6d V:%6d\n", hhwt1.raw_data.Yaw, hhwt1.raw_data.Wz_Raw, hhwt1.raw_data.Wz_Corrected, hhwt1.raw_data.V);
-		UD_printf("YAW:%f Wz:%f YAW_rad:%f Wz_rad:%f \n", HWT_ReadYawDeg(&hhwt1), HWT_ReadWzDeg(&hhwt1), HWT_ReadYawRad(&hhwt1), HWT_ReadWzRad(&hhwt1));
-		osDelay(100);
+		// UD_printf("YAW:%f Wz:%f YAW_rad:%f Wz_rad:%f \n", HWT_ReadYawDeg(&hhwt1), HWT_ReadWzDeg(&hhwt1), HWT_ReadYawRad(&hhwt1), HWT_ReadWzRad(&hhwt1));
+		osDelay(1000);
 	}
 }
 
