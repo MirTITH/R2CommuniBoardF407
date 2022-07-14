@@ -19,7 +19,7 @@
 #include "tim.h"
 #include <stdbool.h>
 
-// int Claw_Steer_pw[2] = {0};
+int Claw_Steer_pw[2] = {0};
 bool claw_open = false;
 float lift_pos = 0;
 
@@ -64,15 +64,18 @@ void UpperTask(void const *argument)
 		positionServo(0, &hDJI[1]);
 
 		// 爪子舵机
+		// __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, Claw_Steer_pw[0]);	// 1号，PD12
+		// __HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, Claw_Steer_pw[1]); // 绿,PB15
+
 		if (claw_open)
 		{
-			__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 1715);	// 白，PD12
-			__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, 501); // 绿,PB15
+			__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 1076);	// 1号，PD12
+			__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, 1195); // 2号,PB15
 		}
 		else
 		{
-			__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 1050);	// 白，PD12
-			__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, 1100); // 绿,PB15
+			__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 1694);	// 1号，PD12
+			__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, 1767); // 2号,PB15
 		}
 
 		CanTransmit_DJI_1234(&hcan1,

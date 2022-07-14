@@ -22,7 +22,7 @@ void vRegisterCustomCLICommands(void)
 	CLI_New_Command(testvar, set CLI_test_var, F_Set_CLI_test_var, -1);
 	CLI_New_Command(claw_sw, claw open and close, F_claw_sw, 0);
 	CLI_New_Command(lift_pos, flaw_pos pos, F_lift_pos, -1);
-	// CLI_New_Command(claw_steer, claw_steer <0|1> pause width, F_claw_steer, -1);
+	CLI_New_Command(claw_steer, claw_steer <0|1> pause width, F_claw_steer, -1);
 	// CLI_New_Command(sc, shengjiang zhuazi, F_Set_shangceng, -1);
 	CLI_New_Command(joystkl, joystick left_x left_y, F_Set_joystickL, 2);
 	CLI_New_Command(joystkr, joystick right_x right_y, F_Set_joystickR, 2);
@@ -89,39 +89,39 @@ BaseType_t F_kamimadoka(char *pcWriteBuffer, size_t xWriteBufferLen, const char 
 }
 
 //-------------------------------自定义命令写在下面（记得在上面的vRegisterCustomCLICommands()中注册）--------------------------
-// extern int Claw_Steer_pw[2];
-// BaseType_t F_claw_steer(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
-// {
-// 	BaseType_t xParameterStringLength;
-// 	const char *pcParameter;
-// 	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength);
-// 	int id = 0;
+extern int Claw_Steer_pw[2];
+BaseType_t F_claw_steer(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
+{
+	BaseType_t xParameterStringLength;
+	const char *pcParameter;
+	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength);
+	int id = 0;
 
-// 	if (pcParameter == NULL) // 说明没有带参数
-// 	{
-// 		UD_printf("Claw_Steer_pw[0] == %d\n", Claw_Steer_pw[0]);
-// 		UD_printf("Claw_Steer_pw[1] == %d\n", Claw_Steer_pw[1]);
-// 		return pdFALSE;
-// 	}
-// 	else
-// 	{
-// 		id = atoi(pcParameter);
-// 	}
+	if (pcParameter == NULL) // 说明没有带参数
+	{
+		UD_printf("Claw_Steer_pw[0] == %d\n", Claw_Steer_pw[0]);
+		UD_printf("Claw_Steer_pw[1] == %d\n", Claw_Steer_pw[1]);
+		return pdFALSE;
+	}
+	else
+	{
+		id = atoi(pcParameter);
+	}
 
-// 	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 2, &xParameterStringLength);
+	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 2, &xParameterStringLength);
 
-// 	if (pcParameter == NULL) // 说明没有带参数
-// 	{
-// 		UD_printf("Claw_Steer_pw[%d] == %d\n", id, Claw_Steer_pw[id]);
-// 	}
-// 	else
-// 	{
-// 		Claw_Steer_pw[id] = atoi(pcParameter);
-// 		UD_printf("set Claw_Steer_pw[%d] = %d\n", id, Claw_Steer_pw[id]);
-// 	}
+	if (pcParameter == NULL) // 说明没有带参数
+	{
+		UD_printf("Claw_Steer_pw[%d] == %d\n", id, Claw_Steer_pw[id]);
+	}
+	else
+	{
+		Claw_Steer_pw[id] = atoi(pcParameter);
+		UD_printf("set Claw_Steer_pw[%d] = %d\n", id, Claw_Steer_pw[id]);
+	}
 
-// 	return pdFALSE; // 结束执行
-// }
+	return pdFALSE; // 结束执行
+}
 
 extern float lift_pos;
 BaseType_t F_lift_pos(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
