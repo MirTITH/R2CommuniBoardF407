@@ -21,6 +21,7 @@ void vRegisterCustomCLICommands(void)
 {
 	CLI_New_Command(testvar, set CLI_test_var, F_Set_CLI_test_var, -1);
 	CLI_New_Command(claw_sw, claw open and close, F_claw_sw, 0);
+	CLI_New_Command(lift_pos, flaw_pos pos, F_lift_pos, -1);
 	// CLI_New_Command(claw_steer, claw_steer <0|1> pause width, F_claw_steer, -1);
 	// CLI_New_Command(sc, shengjiang zhuazi, F_Set_shangceng, -1);
 	CLI_New_Command(joystkl, joystick left_x left_y, F_Set_joystickL, 2);
@@ -122,6 +123,24 @@ BaseType_t F_kamimadoka(char *pcWriteBuffer, size_t xWriteBufferLen, const char 
 // 	return pdFALSE; // 结束执行
 // }
 
+extern float lift_pos;
+BaseType_t F_lift_pos(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
+{
+	BaseType_t xParameterStringLength;
+	const char *pcParameter;
+	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength);
+
+	if (pcParameter != NULL)
+	{
+		lift_pos = atof(pcParameter);
+	}
+
+	UD_printf("lift_pos:%g\n", lift_pos);
+
+	return pdFALSE; // 结束执行
+}
+
+
 extern bool claw_open;
 BaseType_t F_claw_sw(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
 {
@@ -169,33 +188,6 @@ BaseType_t F_reboot(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcC
 	HAL_NVIC_SystemReset();
 	return pdFAIL;
 }
-
-// extern double speed_shengjiang;
-// extern double speed_zhuazi;
-// BaseType_t F_Set_shangceng(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString) 
-// {
-// 	BaseType_t xParameterStringLength;
-// 	const char *pcParameter;
-// 	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength);
-
-// 	// UD_printf("enter\n", speed_zhuazi);
-
-// 	// HAL_Delay(2);
-
-// 	if (pcParameter != NULL) // 说明没有带参数
-// 	{
-// 		speed_zhuazi = atof(pcParameter);
-// 		// UD_printf("z %g ", speed_zhuazi);
-// 	}
-// 	pcParameter = FreeRTOS_CLIGetParameter(pcCommandString, 2, &xParameterStringLength);
-
-// 	if (pcParameter != NULL) // 说明没有带参数
-// 	{
-// 		speed_shengjiang = atof(pcParameter);
-// 		// UD_printf("s %g\n", speed_shengjiang);
-// 	}
-// 	return pdFALSE; // 结束执行
-// }
 
 #include "uart_com.h"
 extern UC_Data_t RxData;

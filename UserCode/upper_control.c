@@ -21,29 +21,32 @@
 
 // int Claw_Steer_pw[2] = {0};
 bool claw_open = false;
+float lift_pos = 0;
 
 void UpperTask(void const *argument)
 {
 	const UC_Data_t *RxData = argument;
-	double lift_speed;
+	// double lift_speed;
 
 	uint32_t PreviousWakeTime = osKernelSysTick();
 
 	for (;;)
 	{
 		// 升降架
-		lift_speed = RxData->Righty;
+		positionServo(lift_pos, &hDJI[0]);
 
-		if (lift_speed > 400)
-			lift_speed -= 400;
-		else if (lift_speed < -400)
-			lift_speed += 400;
-		else
-			lift_speed = 0;
+		// lift_speed = RxData->Righty;
+		// if (lift_speed > 400)
+		// 	lift_speed -= 400;
+		// else if (lift_speed < -400)
+		// 	lift_speed += 400;
+		// else
+		// 	lift_speed = 0;
 
-		speedServo(2 * lift_speed, &hDJI[0]);
+		// speedServo(2 * lift_speed, &hDJI[0]);
 
 		// 爪子夹具
+
 		if ((RxData->buttons & (1 << 4)) || (RxData->buttons & (1 << 3))) // button 3,4
 		{
 			speedServo(500, &hDJI[2]);
@@ -85,6 +88,9 @@ void UpperTaskInit()
 {
 	// 升降
 	hDJI[0].motorType = M3508;
+	hDJI[0].speedPID.outputMax = 5000;
+	hDJI[0].posPID.outputMax = 6000;
+	hDJI[0].posPID.KP = 20.0f;
 	
 	// 爪子旋转
 	hDJI[1].motorType = M2006;
