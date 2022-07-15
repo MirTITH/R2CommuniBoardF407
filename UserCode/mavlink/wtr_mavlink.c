@@ -2,7 +2,7 @@
  * @file wtr_mavlink.c
  * @author TITH (1023515576@qq.com)
  * @brief 移植到 stm32 的 mavlink
- * @version 0.1
+ * @version 0.2
  * @date 2022-07-15
  *
  * @copyright Copyright (c) 2022
