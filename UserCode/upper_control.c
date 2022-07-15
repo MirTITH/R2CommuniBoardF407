@@ -4,9 +4,9 @@
  * @brief 上层控制
  * @version 0.1
  * @date 2022-07-11
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #include "main.h"
@@ -19,74 +19,6 @@
 #include "tim.h"
 #include <stdbool.h>
 
-int Claw_Steer_pw[2] = {0};
-bool claw_open = false;
-float lift_pos = 0;
-
-void UpperTask(void const *argument)
-{
-	const UC_Data_t *RxData = argument;
-	// double lift_speed;
-
-	uint32_t PreviousWakeTime = osKernelSysTick();
-
-	for (;;)
-	{
-		// 升降架
-		positionServo(lift_pos, &hDJI[0]);
-
-		// lift_speed = RxData->Righty;
-		// if (lift_speed > 400)
-		// 	lift_speed -= 400;
-		// else if (lift_speed < -400)
-		// 	lift_speed += 400;
-		// else
-		// 	lift_speed = 0;
-
-		// speedServo(2 * lift_speed, &hDJI[0]);
-
-		// 爪子夹具
-
-		if ((RxData->buttons & (1 << 4)) || (RxData->buttons & (1 << 3))) // button 3,4
-		{
-			speedServo(500, &hDJI[2]);
-		}
-		else if ((RxData->buttons & (1 << 5)) || (RxData->buttons & (1 << 2)))
-		{
-			speedServo(-500, &hDJI[2]);
-		}
-		else
-		{
-			speedServo(0, &hDJI[2]);
-		}
-
-		// 爪子旋转
-		positionServo(0, &hDJI[1]);
-
-		// 爪子舵机
-		// __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, Claw_Steer_pw[0]);	// 1号，PD12
-		// __HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, Claw_Steer_pw[1]); // 绿,PB15
-
-		if (claw_open)
-		{
-			__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 1076);	// 1号，PD12
-			__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, 1195); // 2号,PB15
-		}
-		else
-		{
-			__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 1694);	// 1号，PD12
-			__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, 1767); // 2号,PB15
-		}
-
-		CanTransmit_DJI_1234(&hcan1,
-							 hDJI[0].speedPID.output,
-							 hDJI[1].speedPID.output,
-							 hDJI[2].speedPID.output,
-							 hDJI[3].speedPID.output);
-		osDelayUntil(&PreviousWakeTime, 2);
-	}
-}
-
 void UpperTaskInit()
 {
 	// 升降
@@ -94,7 +26,7 @@ void UpperTaskInit()
 	hDJI[0].speedPID.outputMax = 5000;
 	hDJI[0].posPID.outputMax = 6000;
 	hDJI[0].posPID.KP = 20.0f;
-	
+
 	// 爪子旋转
 	hDJI[1].motorType = M2006;
 
@@ -102,14 +34,90 @@ void UpperTaskInit()
 	hDJI[2].motorType = M3508;
 	hDJI[2].speedPID.outputMax = 2000;
 
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim12,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
 }
 
-void UpperTaskStart(UC_Data_t *RxData)
+void UpperTask(void const *argument)
+{
+	const mavlink_upper_t *UpperData = argument;
+	// double lift_speed;
+
+	uint32_t PreviousWakeTime = osKernelSysTick();
+
+	for (;;)
+	{
+		// 升降架
+		if (UpperData->servo_type & 1)
+		{
+			speedServo(UpperData->lift, &hDJI[0]);
+		}
+		else
+		{
+			positionServo(UpperData->lift, &hDJI[0]);
+		}
+
+		// 爪子开合（大疆电机）
+		if (UpperData->servo_type & (1 << 1))
+		{
+			speedServo(UpperData->claw_OC_DJI, &hDJI[2]);
+		}
+		else
+		{
+			positionServo(UpperData->claw_OC_DJI, &hDJI[2]);
+		}
+
+		// 爪子舵机
+		__HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, UpperData->claw_OC_L);
+		__HAL_TIM_SetCompare(&htim12, TIM_CHANNEL_2, UpperData->claw_OC_R);
+
+		// 爪子旋转
+		if (UpperData->servo_type & (1 << 2))
+		{
+			speedServo(UpperData->claw_spin, &hDJI[1]);
+		}
+		else
+		{
+			positionServo(UpperData->claw_spin, &hDJI[1]);
+		}
+
+		switch (UpperData->vice_lift)
+		{
+		case 0:
+			// 降下来
+			break;
+		case 1:
+			// 升上去
+			break;
+		default:
+			break;
+		}
+
+		// if (claw_open)
+		// {
+		// 	Claw_Steer_pw[0] = 1076;
+		// 	Claw_Steer_pw[1] = 1195;
+		// }
+		// else
+		// {
+		// 	Claw_Steer_pw[0] = 1694;
+		// 	Claw_Steer_pw[1] = 1767;
+		// }
+
+		CanTransmit_DJI_1234(&hcan1,
+							 hDJI[0].speedPID.output,
+							 hDJI[1].speedPID.output,
+							 hDJI[2].speedPID.output,
+							 hDJI[3].speedPID.output);
+
+		osDelayUntil(&PreviousWakeTime, 2);
+	}
+}
+
+void UpperTaskStart(mavlink_upper_t *UpperData)
 {
 	osThreadDef(upper, UpperTask, osPriorityBelowNormal, 0, 1024);
-	osThreadCreate(osThread(upper), RxData);
+	osThreadCreate(osThread(upper), UpperData);
 
 	// osThreadDef(upper_test, UpperTestTask, osPriorityBelowNormal, 0, 256);
 	// osThreadCreate(osThread(chassis_test), NULL);

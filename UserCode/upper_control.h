@@ -9,7 +9,7 @@
  * 
  */
 
-#include "uart_com.h"
+#include "wtr_mavlink.h"
 
-void UpperTaskStart(UC_Data_t *RxData);
+void UpperTaskStart(mavlink_upper_t *UpperData);
 void UpperTaskInit();

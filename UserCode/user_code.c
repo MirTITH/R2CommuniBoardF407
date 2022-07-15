@@ -9,11 +9,6 @@
  *
  */
 
-/*
-osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
-defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
-*/
-
 #include "user_code.h"
 #include "CLI.h"
 #include "uart_device.h"
@@ -23,19 +18,16 @@ defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 #include "DJI.h"
 #include "wtr_can.h"
 #include "Caculate.h"
-#include "uart_com.h"
+#include "wtr_mavlink.h"
 #include "string.h"
 #include <stdbool.h>
 #include "upper_control.h"
-#include "HWT101CT.h"
 
 void TestTask(void const *argument);
 
-UC_Data_t RxData = {0};
+mavlink_upper_t UpperData = {0};
 
 int can_rx_count = 0;
-
-HWT_Handle_t hhwt1;
 
 void StartDefaultTask(void const *argument)
 {
@@ -47,8 +39,6 @@ void StartDefaultTask(void const *argument)
 	osThreadDef(testTask, TestTask, osPriorityNormal, 0, 256);
 	osThreadCreate(osThread(testTask), NULL);
 
-	// HWT_Init(&hhwt1, &huart3);
-
 	DJI_PID_Init();
 
 	UpperTaskInit();
@@ -56,9 +46,10 @@ void StartDefaultTask(void const *argument)
 	DJI_motorType_Init();
 	CANFilterInit(&hcan1);
 
+	WTR_MAVLink_Init(&huart3, MAVLINK_COMM_0);
+	WTR_MAVLink_RcvStart(MAVLINK_COMM_0);
 
-	UC_Receive_Start(1, &huart3, &RxData);
-	UpperTaskStart(&RxData);
+	UpperTaskStart(&UpperData);
 
 	// ADS1256_Init();
 
@@ -70,25 +61,25 @@ void StartDefaultTask(void const *argument)
 	}
 }
 
-bool pnt_UC_Debug_Data = false;
-bool pnt_RxData = false;
+bool pnt_UpperData = false;
 bool pnt_can_rx_count = false;
 void TestTask(void const *argument)
 {
 	for (;;)
 	{
-		if (pnt_UC_Debug_Data)
+		if (pnt_UpperData)
 		{
-			UC_print_debug_data();
+			UD_printf("servo_type:%x claw_OC_DJI:%5g claw_OC_L:%4d claw_OC_R:%4d claw_spin:%5g lift:%5g vice_lift:%d\n",
+					  UpperData.servo_type,
+					  UpperData.claw_OC_DJI,
+					  UpperData.claw_OC_L,
+					  UpperData.claw_OC_R,
+					  UpperData.claw_spin,
+					  UpperData.lift,
+					  UpperData.vice_lift);
 		}
 
-		if (pnt_RxData)
-		{
-			UD_printf("lx:%5d ly:%5d rx:%5d ry:%5d ", RxData.Leftx, RxData.Lefty, RxData.Rightx, RxData.Righty);
-			UD_printf("but:%x\n", RxData.buttons);
-		}
-
-		if(pnt_can_rx_count)
+		if (pnt_can_rx_count)
 		{
 			UD_printf("can_rx_count:%d\n", can_rx_count);
 		}
